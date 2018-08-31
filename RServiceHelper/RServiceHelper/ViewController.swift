@@ -13,6 +13,27 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
+        
+//        RServiceHelper.request(method: .get, apiName: "getList") { (result) in
+//
+//            if let error = result.error {
+//                print("Error on api call: \(error)")
+//                return
+//            }
+//
+//            print("Result data: \(result.httpCode)")
+//            print("Result data: \(String(describing: result.data))")
+//        }
+//
+//        RServiceHelper.request(params: ["key1" : "value"], method: .post, apiName: "auth") { (result) in
+//            if let error = result.error {
+//                print("Error on api call: \(error)")
+//                return
+//            }
+//
+//            print("Result data: \(result.httpCode)")
+//            print("Result data: \(String(describing: result.data))")
+//        }
     }
 
     override func didReceiveMemoryWarning() {

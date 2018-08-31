@@ -22,6 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         config.basicAuthUserName = "admin"
         config.basicAuthPassword = "zzzzzzzz"
         
+        RServiceHelper.config(configModal: config)
         
         return true
     }

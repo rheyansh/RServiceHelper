@@ -11,17 +11,20 @@ import UIKit
 import UIKit
 import MobileCoreServices
 
-//@@ Multipart upload keys
-let keyMultiPartData = "data"
-let keyMultiPartFileType = "fileType"
-let keyMultiPartKeyAtServerSide = "keyAtServerSide"
-let keyMultiPartFilePath = "filePath"
-let multiPartFileTypeVideo = "video"
-let multiPartFileTypeAudio = "audio"
-let multiPartFileTypeImage = "image"
 
 let unknownHTTPCode: Int = 9999
 let internetConnErrorCode: Int = 1002
+
+struct RMultiPartKey {
+    
+    static let data = "data"
+    static let fileType = "fileType"
+    static let field = "keyAtServerSide"
+    static let filePath = "filePath"
+    static let typeVideo = "video"
+    static let typeAudio = "audio"
+    static let typeImage = "image"
+}
 
 enum loadingIndicatorType: CGFloat {
     
@@ -40,7 +43,7 @@ enum MethodType: CGFloat {
 struct RServiceResult {
     
     var error: Error?
-    var result: Any?
+    var data: Any?
     var httpURLResponse: HTTPURLResponse?
     var httpCode: Int!
 }
@@ -162,8 +165,8 @@ class RServiceHelper: NSObject {
         
         for pathInfo in paths {
             
-            guard let filePath = pathInfo[keyMultiPartFilePath] as? String,
-                let fieldName = pathInfo[keyMultiPartKeyAtServerSide] as? String else {
+            guard let filePath = pathInfo[RMultiPartKey.filePath] as? String,
+                let fieldName = pathInfo[RMultiPartKey.field] as? String else {
                     return httpBody
             }
             
@@ -171,20 +174,16 @@ class RServiceHelper: NSObject {
             let filename = url.lastPathComponent
             let mimetype = mimeTypeForPath(for: filePath)
             
-            var data: Data?
-            
-            do {
-                data = try Data(contentsOf: url)
-            } catch {
-                print(error)
-            }
-            
             httpBody.append("--\(boundary)\r\n")
             httpBody.append("Content-Disposition: form-data; name=\"\(fieldName)\"; filename=\"\(filename)\"\r\n")
             httpBody.append("Content-Type: \(mimetype)\r\n\r\n")
             
-            if let data = data {
+            do {
+                let data = try Data(contentsOf: url)
                 httpBody.append(data)
+
+            } catch {
+                print(error)
             }
             
             httpBody.append("\r\n")
@@ -214,15 +213,15 @@ class RServiceHelper: NSObject {
         
         for mediaInfo in mediaArray {
             
-            guard let fieldName = mediaInfo[keyMultiPartKeyAtServerSide] as? String,
-                let data = mediaInfo[keyMultiPartData] as? Data else {
+            guard let fieldName = mediaInfo[RMultiPartKey.field] as? String,
+                let data = mediaInfo[RMultiPartKey.data] as? Data else {
                     return httpBody
             }
             
             var fileType = ""
             var mimetype = data.mimeType
             
-            if let type = mediaInfo[keyMultiPartFileType] as? String {
+            if let type = mediaInfo[RMultiPartKey.fileType] as? String {
                 fileType = type
             }
             
@@ -230,10 +229,10 @@ class RServiceHelper: NSObject {
             let timestamp = NSDate().timeIntervalSince1970
             var filename = "\(timestamp)"
             
-            if fileType == multiPartFileTypeVideo {
+            if fileType == RMultiPartKey.typeVideo {
                 filename  = filename + "_video.mp4"
                 mimetype = "video/mp4";
-            } else if fileType == multiPartFileTypeAudio {
+            } else if fileType == RMultiPartKey.typeAudio {
                 filename  = filename + "_audio.m4a"
                 mimetype = "audio/m4a";
             } else {
@@ -449,7 +448,7 @@ extension URLRequest  {
                 do {
                     let resultData = try JSONSerialization.jsonObject(with: data!, options: JSONSerialization.ReadingOptions.mutableContainers)
                     //Debug.log("\n\n result  >>>>>>\n\(resultData)")
-                    result.result = resultData
+                    result.data = resultData
                 } catch {
                     result.error = error
                     Debug.log("\n\n error in JSONSerialization")
